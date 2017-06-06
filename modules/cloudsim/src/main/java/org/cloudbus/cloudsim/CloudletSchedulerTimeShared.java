@@ -318,6 +318,14 @@ public class CloudletSchedulerTimeShared extends CloudletScheduler {
 	@Override
 	public List<Double> getCurrentRequestedMips() {
 		List<Double> mipsShare = new ArrayList<Double>();
+		//TODO 源码似乎错误，增加下面内容 
+		/***************************/
+		if (getCurrentMipsShare() != null) {
+			for (Double mips : getCurrentMipsShare()) {
+				mipsShare.add(mips);
+			}
+		}
+		/***************************/
 		return mipsShare;
 	}
 

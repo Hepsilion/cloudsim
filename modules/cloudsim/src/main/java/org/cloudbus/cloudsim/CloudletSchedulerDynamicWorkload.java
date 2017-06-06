@@ -74,6 +74,9 @@ public class CloudletSchedulerDynamicWorkload extends CloudletSchedulerTimeShare
 		setTotalMips(getNumberOfPes() * getMips());
 		setUnderAllocatedMips(new HashMap<String, Double>());
 		setCachePreviousTime(-1);
+		
+			Log.printLine("CloudLet scheduler mips = " + mips);
+			Log.printLine("CloudLet scheduler Pes = " + numberOfPes);
 	}
 
 	@Override
@@ -152,10 +155,12 @@ public class CloudletSchedulerDynamicWorkload extends CloudletSchedulerTimeShare
 
 	@Override
 	public List<Double> getCurrentRequestedMips() {
+			//	    Log.printLine("SetTotalMips = "  + getMaxRequestedMips());
 		if (getCachePreviousTime() == getPreviousTime()) {
 			return getCacheCurrentRequestedMips();
 		}
 		List<Double> currentMips = new ArrayList<Double>();
+			//  Log.printLine("CloudletSched getTotalMips = "  + getTotalMips());
 		double totalMips = getTotalUtilizationOfCpu(getPreviousTime()) * getTotalMips();
 		double mipsForPe = totalMips / getNumberOfPes();
 

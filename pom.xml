@@ -16,6 +16,8 @@
   	<module>modules</module>
   	<module>documentation</module>
   	<module>distribution</module>
+  	<module>workflowsim</module>
+  	<module>workflowsim-examples</module>
   </modules>
   
   <organization>

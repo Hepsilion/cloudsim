@@ -36,6 +36,9 @@ public class Vm {
 
 	/** The MIPS capacity of each VM's PE. */
 	private double mips;
+	
+		/** Maximum available Mips */
+	    private double maxMips;
 
 	/** The number of PEs required by the VM. */
 	private int numberOfPes;
@@ -72,6 +75,8 @@ public class Vm {
 
 	/** Indicates if the VM is being instantiated. */
 	private boolean beingInstantiated;
+	
+		private boolean sizeHasBeenModified;
 
 	/** The mips allocation history. 
          * @todo Instead of using a list, this attribute would be 
@@ -120,6 +125,7 @@ public class Vm {
 		setUserId(userId);
 		setUid(getUid(userId, id));
 		setMips(mips);
+			setMaxMips(mips);
 		setNumberOfPes(numberOfPes);
 		setRam(ram);
 		setBw(bw);
@@ -135,6 +141,10 @@ public class Vm {
 		setCurrentAllocatedRam(0);
 		setCurrentAllocatedSize(0);
 	}
+	
+		public Vm(){
+			setId(-1);
+		}
 
 	/**
 	 * Updates the processing of cloudlets running on this VM.
@@ -160,11 +170,12 @@ public class Vm {
 	 */
 	public List<Double> getCurrentRequestedMips() {
 		List<Double> currentRequestedMips = getCloudletScheduler().getCurrentRequestedMips();
-		if (isBeingInstantiated()) {
+		if (isBeingInstantiated() || isSizeHasBeenModified()) {
 			currentRequestedMips = new ArrayList<Double>();
 			for (int i = 0; i < getNumberOfPes(); i++) {
 				currentRequestedMips.add(getMips());
 			}
+				// setSizeHasBeenModified(false);  // if set false here, seems to generate bug (because , this method is called more than 1 time after vm size change (?) )
 		}
 		return currentRequestedMips;
 	}
@@ -615,4 +626,20 @@ public class Vm {
 		getStateHistory().add(newState);
 	}
 
+		public double getMaxMips() {
+	        return maxMips;
+	    }
+	
+	    private void setMaxMips(double Max_mips) {
+	        this.maxMips = Max_mips;
+	    }
+	    
+	    
+	    protected boolean isSizeHasBeenModified() {
+	        return sizeHasBeenModified;
+	    }
+	
+	    protected void setSizeHasBeenModified(boolean SizeHasBeenModified_) {
+	        sizeHasBeenModified = SizeHasBeenModified_;
+	    }
 }

@@ -183,6 +183,19 @@ public abstract class VmScheduler {
 		}
 		return getPeList().get(0).getMips();
 	}
+	
+		/**
+		 * Returns PE MAXIMUM capacity in MIPS.
+		 * 
+		 * @return mips
+		 */
+		public double getMaxPeCapacity() {
+			if (getPeList() == null) {
+				Log.printLine("Pe list is empty");
+				return 0;
+			}
+			return getPeList().get(0).getMaxMips();
+		}
 
 	/**
 	 * Gets the pe list.
@@ -207,12 +220,13 @@ public abstract class VmScheduler {
 		this.peList = peList;
 	}
 
+	//TODO 为了尽量少的改变原有CloudSim,实验代码放在了单独的包中，为了需要，将这个函数的访问属性由protected改为public
 	/**
 	 * Gets the mips map.
 	 * 
 	 * @return the mips map
 	 */
-	protected Map<String, List<Double>> getMipsMap() {
+	public Map<String, List<Double>> getMipsMap() {
 		return mipsMap;
 	}
 
@@ -239,7 +253,7 @@ public abstract class VmScheduler {
 	 * 
 	 * @param availableMips the new free mips
 	 */
-	protected void setAvailableMips(double availableMips) {
+	public void setAvailableMips(double availableMips) {
 		this.availableMips = availableMips;
 	}
 

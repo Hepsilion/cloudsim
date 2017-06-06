@@ -72,7 +72,7 @@ public abstract class PowerVmAllocationPolicyAbstract extends VmAllocationPolicy
 				CloudSim.clock());
 		return false;
 	}
-
+	
 	/**
 	 * Finds the first host that has enough resources to host a given VM.
 	 * 
@@ -85,8 +85,36 @@ public abstract class PowerVmAllocationPolicyAbstract extends VmAllocationPolicy
 				return host;
 			}
 		}
+		
+			//if we are here, it means that no Host are suitable...
+	        //HOST that used DVFS can be modified to host a new VM
+	        // OR Vm size has to be decrease
 		return null;
 	}
+	
+		public PowerHost TryDVFSEnableHost(PowerHost host , Vm vm){
+            if(host.MakeSuitableHostForVm(vm)) // change Pe frequency
+                return host;
+            else{
+                if(host.decreaseVMMipsToHostNewVm(vm))
+                    return host;
+            }
+            return null ;// retour jamais null
+		}
+    
+	    /*public PowerHost findDVFSEnableHost(Vm vm){     
+	    	for (PowerHost host : this.<PowerHost> getHostList()) {
+				if(host.isEnableDVFS()){
+				    if(host.MakeSuitableHostForVm(vm)) // change Pe frequency
+				        return host;
+				    else{
+				        if(host.decreaseVMMipsToHostNewVm(vm))
+				            return host;
+				    }
+				}
+	       	}
+	        return null;
+	  	}*/
 
 	@Override
 	public void deallocateHostForVm(Vm vm) {

@@ -73,8 +73,15 @@ public class HostDynamicWorkload extends Host {
 
 		for (Vm vm : getVmList()) {
 			double totalRequestedMips = vm.getCurrentRequestedTotalMips();
+				//Log.printLine("Requested MIPS = " + totalRequestedMips);
+	            if(totalRequestedMips > vm.getMips())
+	                totalRequestedMips = vm.getMips();
+	              
+	            //Log.printLine(">>>>> Requested MIPS = " + totalRequestedMips);
 			double totalAllocatedMips = getVmScheduler().getTotalAllocatedMipsForVm(vm);
-
+				//Log.printLine("Allocated MIPS = " + totalAllocatedMips);
+            	//Log.printLine("VM MIPS = " + vm.getMips() + " / VM MAX MIPS = " + vm.getMaxMips());
+			
 			if (!Log.isDisabled()) {
 				Log.formatLine(
 						"%.2f: [Host #" + getId() + "] Total allocated MIPS for VM #" + vm.getId()
@@ -125,6 +132,11 @@ public class HostDynamicWorkload extends Host {
 			setUtilizationMips(getUtilizationMips() + totalAllocatedMips);
 			hostTotalRequestedMips += totalRequestedMips;
 		}
+		
+			// TRY TO PUT HERE CODE FOR DVFS
+	        // but, the problem is that in this case
+	        // the energy comsumption is compute with the NEW frequency
+	        // (has to be done with the frequency at Tn-1)
 
 		addStateHistoryEntry(
 				currentTime,
@@ -134,6 +146,54 @@ public class HostDynamicWorkload extends Host {
 
 		return smallerTime;
 	}
+	
+		/**
+	     * 
+	     * Check if DVFS is active on the Host.
+	     * If yes, dvfs method is called.
+	     * 
+	     * 
+	     */
+	    public void isDvfsActivatedOnHost()
+	    {
+	       // dvfs call
+	            if(isEnableDVFS())
+	                applyDvfsOnHost();
+	    }
+	    
+		/**
+		 * DVFS method for each Pe , 'changeFrequency' methode is called
+		 * 
+		 * then this method check if VM size has to be Decrease or Increase
+		 * regarding the Pe.changeFrequency return value.
+		 */
+		protected void applyDvfsOnHost() {
+			for (Pe pe : this.<Pe> getPeList()) {
+				double utilPe = pe.getPeProvisioner().getUtilization() * 100;
+				int cur_mips = pe.getMips();
+				// System.out.println("PE " + pe.getId() + " Utilization == " + utilPe);
+	
+				int res = pe.changeFrequency();
+				// System.out.println("PE " + pe.getId() +" New frequency =" + pe.getMips());
+				double new_AvailableMips = getAvailableMips()+ (pe.getMips() - cur_mips);
+	
+				/*
+				 * it means that the CPU frequency change caused an overflow of Host
+				 * Capacity (Available Mips of Host < 0 ! ) All VM of that Host will
+				 * be reduce in order to fit them on the Host
+				 */
+				if (new_AvailableMips < 0)
+					decreaseVmMips();
+				else // TODO 这里原来没有else，似乎错了，我在这里加了一个else,使其成为分支选择结构
+					setAvailableMips(new_AvailableMips);
+				// System.out.println("Available mips  = " + getAvailableMips());
+				/*
+				 * if the cpu frequency has been increased , we can regrow the VMs size.
+				 */
+				if (res == 1 || res == 2)
+					regrowVmMips();
+			}
+		}
 
 	/**
 	 * Gets the list of completed vms.
@@ -197,6 +257,7 @@ public class HostDynamicWorkload extends Host {
 	 */
 	public double getUtilizationOfCpu() {
 		double utilization = getUtilizationMips() / getTotalMips();
+			//System.out.println("Utilization compute :  " + getUtilizationMips() + " / " + getTotalMips() + " = " + utilization);
 		if (utilization > 1 && utilization < 1.01) {
 			utilization = 1;
 		}

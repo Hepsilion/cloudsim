@@ -482,6 +482,11 @@ public class Datacenter extends SimEntity {
 	 */
 	protected void processVmDestroy(SimEvent ev, boolean ack) {
 		Vm vm = (Vm) ev.getData();
+			Host h = vm.getHost();
+	        //h.ReGrowVMMips(vm);
+	        if(h.isEnableDVFS())
+	            h.regrowVmMipsAfterVmEnd(vm);
+        
 		getVmAllocationPolicy().deallocateHostForVm(vm);
 
 		if (ack) {
@@ -747,6 +752,7 @@ public class Datacenter extends SimEntity {
 			Vm vm = host.getVm(vmId, userId);
 			CloudletScheduler scheduler = vm.getCloudletScheduler();
 			double estimatedFinishTime = scheduler.cloudletSubmit(cl, fileTransferTime);
+			scheduler.setPreviousTime(CloudSim.clock()); // TODO 添加：添加这行代码，否则如果任务不是从0时刻到达，那么首次更新任务时，利用的previous time有误
 
 			// if this cloudlet is in the exec queue
 			if (estimatedFinishTime > 0.0 && !Double.isInfinite(estimatedFinishTime)) {
@@ -932,6 +938,7 @@ public class Datacenter extends SimEntity {
 				while (vm.getCloudletScheduler().isFinishedCloudlets()) {
 					Cloudlet cl = vm.getCloudletScheduler().getNextFinishedCloudlet();
 					if (cl != null) {
+							Log.printLine("End of cloudlet " + cl.getCloudletId() + " send event CLOUDLET_RETURN");
 						sendNow(cl.getUserId(), CloudSimTags.CLOUDLET_RETURN, cl);
 					}
 				}
@@ -1060,6 +1067,12 @@ public class Datacenter extends SimEntity {
 		// Below method is for a child class to override
 		registerOtherEntity();
 	}
+	
+		/*public void UpdateVmMipsAfterDVFS(Host host, double percent){
+	        double totalVmMips = 0;
+	        for (Vm vm : host.getVmList()) 
+	            totalVmMips+=vm.getMax_mips();
+	    }*/
 
 	/**
 	 * Gets the host list.

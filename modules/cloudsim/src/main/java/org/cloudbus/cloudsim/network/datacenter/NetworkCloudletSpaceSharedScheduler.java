@@ -16,6 +16,7 @@ import java.util.Map;
 
 import org.cloudbus.cloudsim.Cloudlet;
 import org.cloudbus.cloudsim.CloudletScheduler;
+import org.cloudbus.cloudsim.Datacenter;
 import org.cloudbus.cloudsim.ResCloudlet;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.core.CloudSimTags;
@@ -41,6 +42,8 @@ public class NetworkCloudletSpaceSharedScheduler extends CloudletScheduler {
 
 	/** The used PEs. */
 	protected int usedPes;
+	
+		private Datacenter datacenter;// for network
 
         /**
          * The map of packets to send, where each key is a destination VM
@@ -72,6 +75,19 @@ public class NetworkCloudletSpaceSharedScheduler extends CloudletScheduler {
 		pkttosend = new HashMap<Integer, List<HostPacket>>();
 		pktrecv = new HashMap<Integer, List<HostPacket>>();
 	}
+	
+		public NetworkCloudletSpaceSharedScheduler(Datacenter datacenter_) {
+			super();
+			cloudletWaitingList = new ArrayList<ResCloudlet>();
+			cloudletExecList = new ArrayList<ResCloudlet>();
+			cloudletPausedList = new ArrayList<ResCloudlet>();
+			cloudletFinishedList = new ArrayList<ResCloudlet>();
+			usedPes = 0;
+			currentCpus = 0;
+			pkttosend = new HashMap<Integer, List<HostPacket>>();
+			pktrecv = new HashMap<Integer, List<HostPacket>>();
+	                datacenter=datacenter_;
+		}
 
 	@Override
 	public double updateVmProcessing(double currentTime, List<Double> mipsShare) {

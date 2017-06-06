@@ -196,9 +196,18 @@ public class PowerDatacenter extends Datacenter {
 					getLastProcessTime(),
 					currentTime);
 
+			//System.out.println("last time:"+getLastProcessTime()+",\tcurrent time:"+currentTime);//TODO 真实使用计算关机时间使用
 			for (PowerHost host : this.<PowerHost> getHostList()) {
 				double previousUtilizationOfCpu = host.getPreviousUtilizationOfCpu();
 				double utilizationOfCpu = host.getUtilizationOfCpu();
+				
+				//TODO 真实使用计算关机时间使用
+//				if(previousUtilizationOfCpu==0)
+//					System.out.println("Host "+host.getId()+":shutdown");
+//				else
+//					System.out.println("Host "+host.getId()+":");
+				//System.out.println("Host "+host.getId()+"----last utilization: "+previousUtilizationOfCpu+",\tcurrent utilization: "+utilizationOfCpu);
+				
 				double timeFrameHostEnergy = host.getEnergyLinearInterpolation(
 						previousUtilizationOfCpu,
 						utilizationOfCpu,
@@ -218,6 +227,7 @@ public class PowerDatacenter extends Datacenter {
 						currentTime,
 						host.getId(),
 						timeFrameHostEnergy);
+							host.isDvfsActivatedOnHost();
 			}
 
 			Log.formatLine(

@@ -137,4 +137,8 @@ public class AppCloudlet {
 		// based on type
 
 	}
+	
+		public ArrayList<NetworkCloudlet> getClist() {
+	        return clist;
+	    }
 }

@@ -16,6 +16,7 @@ import java.util.Map;
 
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.core.CloudSimTags;
+import org.cloudbus.cloudsim.core.EventPostBroker;
 import org.cloudbus.cloudsim.core.SimEntity;
 import org.cloudbus.cloudsim.core.SimEvent;
 import org.cloudbus.cloudsim.lists.CloudletList;
@@ -74,6 +75,8 @@ public class DatacenterBroker extends SimEntity {
 	/** The datacenter characteristics map where each key
          * is a datacenter id and each value is its characteristics.. */
 	protected Map<Integer, DatacenterCharacteristics> datacenterCharacteristicsList;
+	
+		protected EventPostBroker Postevt=null;
 
 	/**
 	 * Created a new DatacenterBroker object.
@@ -102,6 +105,42 @@ public class DatacenterBroker extends SimEntity {
 		setVmsToDatacentersMap(new HashMap<Integer, Integer>());
 		setDatacenterCharacteristicsList(new HashMap<Integer, DatacenterCharacteristics>());
 	}
+	
+		/**
+	     * 
+	     * Constructor like Datacenterbroker(name)  +  POST EVENT
+	     * This constructor is used when a broker need to launch another broker
+	     * at the end of its execution.
+	     * 
+	     * In the case where low frequency CPU is used (due to DVFS), an execution delay can appear in some broker,
+	     * This constructor allow to keep the right execution order of a broker.
+	     * 
+	     * 
+	     * @param name
+	     * @param evt_
+	     * @throws Exception 
+	     */
+		public DatacenterBroker(String name, EventPostBroker evt_) throws Exception {
+			super(name);
+		
+			setVmList(new ArrayList<Vm>());
+			setVmsCreatedList(new ArrayList<Vm>());
+			setCloudletList(new ArrayList<Cloudlet>());
+			setCloudletSubmittedList(new ArrayList<Cloudlet>());
+			setCloudletReceivedList(new ArrayList<Cloudlet>());
+		
+			cloudletsSubmitted = 0;
+			setVmsRequested(0);
+			setVmsAcks(0);
+			setVmsDestroyed(0);
+		
+			setDatacenterIdsList(new LinkedList<Integer>());
+			setDatacenterRequestedIdsList(new ArrayList<Integer>());
+			setVmsToDatacentersMap(new HashMap<Integer, Integer>());
+			setDatacenterCharacteristicsList(new HashMap<Integer, DatacenterCharacteristics>());
+		            
+				setPostevt(evt_);
+		}
 
 	/**
 	 * This method is used to send to the broker the list with virtual machines that must be
@@ -130,6 +169,7 @@ public class DatacenterBroker extends SimEntity {
          * be checked too.
 	 */
 	public void submitCloudletList(List<? extends Cloudlet> list) {
+			//	     Log.printLine("liste submit cloudlet size : " + list.size());
 		getCloudletList().addAll(list);
 	}
 
@@ -304,7 +344,7 @@ public class DatacenterBroker extends SimEntity {
          * @todo to ensure the method will be overridden, it should be defined 
          * as abstract in a super class from where new brokers have to be extended.
 	 */
-	protected void processOtherEvent(SimEvent ev) {
+	protected void processOtherEvent(SimEvent ev) {System.out.println(ev.getTag());
 		if (ev == null) {
 			Log.printConcatLine(getName(), ".processOtherEvent(): ", "Error - an event is null.");
 			return;
@@ -312,6 +352,21 @@ public class DatacenterBroker extends SimEntity {
 
 		Log.printConcatLine(getName(), ".processOtherEvent(): Error - event unknown by this DatacenterBroker.");
 	}
+	
+		/**
+		 * 
+		 * Schedule the PostEvent of a broker. This method is called by
+		 * "processCloudletReturn" when all Cloudlet of a Broker are ended
+		 * 
+		 */
+		protected void processPostEvent() {
+	
+			if (getPostevt() != null) {
+				// Log.printLine("Broker " + getId() +
+				// "execution has finished,  postEvent is starting... ");
+				scheduleNow(Postevt.getDest(), Postevt.getTag());
+			}
+		}
 
 	/**
 	 * Create the submitted virtual machines in a datacenter.
@@ -658,5 +713,13 @@ public class DatacenterBroker extends SimEntity {
 	protected void setDatacenterRequestedIdsList(List<Integer> datacenterRequestedIdsList) {
 		this.datacenterRequestedIdsList = datacenterRequestedIdsList;
 	}
+	
+		public EventPostBroker getPostevt() {
+	        return Postevt;
+	    }
+	
+	    public void setPostevt(EventPostBroker Postevt) {
+	        this.Postevt = Postevt;
+	    }
 
 }

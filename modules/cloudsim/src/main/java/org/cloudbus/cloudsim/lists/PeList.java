@@ -76,6 +76,14 @@ public class PeList {
 		}
 		return totalMips;
 	}
+	
+		public static <T extends Pe> int getTotalMaxMips(List<Pe> peList) {
+			int totalMips = 0;
+			for (Pe pe : peList) {
+				totalMips += pe.getMaxMips();
+			}
+			return totalMips;
+		}
 
 	/**
 	 * Gets the max utilization percentage among all PEs.
